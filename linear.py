@@ -29,7 +29,7 @@ class Ui_Linear(QMainWindow):
 
         self.grid_layout = QtWidgets.QGridLayout(self.central_widget)
         self.grid_layout.addWidget(self.set_group_settings_gbox(), 0, 0)
-        self.grid_layout.addWidget(self.set_group_settings_gbox(), 0, 1)
+        # self.grid_layout.addWidget(self.set_group_settings_gbox(), 0, 1)
         self.grid_layout.addWidget(self.set_open_data_gbox(),      1, 0)
         self.grid_layout.addWidget(self.set_actions_gbox(),        1, 1)
 
@@ -96,7 +96,9 @@ class Ui_Linear(QMainWindow):
         return self.group_actions
 
     def reset_settings(self):
-        self.box_savefig.setCheckable(False)
+        print('hihi')
+        self.box_savefig.setCheckState(QtCore.Qt.Unchecked)
+        self.box_grid.setCheckState(QtCore.Qt.Unchecked)
 
 
 

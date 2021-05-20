@@ -1,51 +1,37 @@
-
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
-class App(QWidget):
 
+class Test(QWidget):
     def __init__(self):
         super().__init__()
-        self.title = 'PyQt5 file dialogs - pythonspot.com'
-        self.left = 10
-        self.top = 10
-        self.width = 640
-        self.height = 480
         self.initUI()
-    
+
     def initUI(self):
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-        
-        self.openFileNameDialog()
-        self.openFileNamesDialog()
-        self.saveFileDialog()
-        
+        checkBoxNone = QCheckBox("None Selected")
+        checkBoxA    = QCheckBox("Select A")
+        checkBoxB    = QCheckBox("Select B")
+
+        checkBoxNone.setChecked(True)
+        checkBoxNone.stateChanged.connect(lambda checked: (checkBoxA.setChecked(False), checkBoxB.setChecked(False)))
+        checkBoxA.stateChanged.connect(lambda checked: checkBoxNone.setChecked(False))
+        checkBoxB.stateChanged.connect(lambda checked: checkBoxNone.setChecked(False))
+
+        grid = QGridLayout()
+
+        grid.addWidget(checkBoxNone, 1, 0)
+        grid.addWidget(checkBoxA, 2, 0)
+        grid.addWidget(checkBoxB, 3, 0)
+
+        self.setLayout(grid)
+        self.setWindowTitle('Test')
         self.show()
-    
-    def openFileNameDialog(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;Python Files (*.py)", options=options)
-        if fileName:
-            print(fileName)
-    
-    def openFileNamesDialog(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        files, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.py)", options=options)
-        if files:
-            print(files)
-    
-    def saveFileDialog(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.txt)", options=options)
-        if fileName:
-            print(fileName)
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = App()
+    if not QApplication.instance():
+        app = QApplication(sys.argv)
+    else:
+        app = QApplication.instance()
+    ex = Test()
     sys.exit(app.exec_())
