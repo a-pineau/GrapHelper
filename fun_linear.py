@@ -2,15 +2,21 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-from matplotlib import rc
+from matplotlib import rcParams
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 
 # markers list: https://matplotlib.org/stable/api/markers_api.html
 # TODO: add ticks parameters?
-
-def single_plot(X, Y, my_marker='None', my_color='blue', width=2, my_alpha=1,  
-                x_label=None, y_label=None, my_title=None, x_fontsize=12, y_fontsize=12, 
-                t_fontsize=12,  grid=False, save=False, file_name='my_fig.pdf'):
+def single_plot(x, y,
+                xmin, xmax, ymin, ymax,
+                x_label, y_label, font_label,
+                xticks_size, yticks_size,
+                xticks_color, yticks_color,
+                my_title, font_title,
+                my_color, line_style, width, my_alpha,   
+                my_marker, marker_size, marker_inner_color, marker_outer_color,
+                grid, save, file_name
+                ):
     """
     A helper function to make a simple plot
     Parameters:
@@ -36,10 +42,20 @@ def single_plot(X, Y, my_marker='None', my_color='blue', width=2, my_alpha=1,
     """
     fig, ax = plt.subplots(constrained_layout=True)
 
-    ax.plot(X, Y, marker=my_marker, color=my_color, linewidth=width, alpha=my_alpha)
-    ax.set_xlabel(x_label, fontsize=x_fontsize)
-    ax.set_ylabel(y_label, fontsize=y_fontsize)
-    ax.set_title(my_title, fontsize=t_fontsize)
+    ax.plot(x, y,
+            color=my_color, linestyle=line_style, linewidth=width, 
+            alpha=my_alpha,
+            marker=my_marker, markersize=marker_size, markerfacecolor=marker_inner_color,
+            markeredgecolor=marker_outer_color)
+
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+    ax.set_xlabel(x_label, fontdict=font_label)
+    ax.set_ylabel(y_label, fontdict=font_label)
+    ax.set_title(my_title, fontdict=font_title)
+
+    ax.tick_params(axis='x', labelsize=xticks_size, colors=xticks_color)
+    ax.tick_params(axis='y', labelsize=yticks_size, colors=yticks_color)
 
     if grid: ax.grid()
     if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.025)
@@ -51,7 +67,21 @@ def single_plot(X, Y, my_marker='None', my_color='blue', width=2, my_alpha=1,
 if __name__ == '__main__':
     x = sorted([random.randint(0, x) for x in range(0, 100)])
     y = sorted([random.randint(0, x) for x in range(0, 100)])
-    single_plot(x, y, x_label='x [m]', y_label='y [s]', my_title='$x = f(y)$', t_fontsize=20, grid=False,
-                x_fontsize=20, y_fontsize=20, my_color='green', width=4, my_alpha=0.5, my_marker='o',
-                save=True, file_name='test.pdf')
+    print(x)
+    print(y)
+    font = {'family': 'serif',
+    'color':  'darkred',
+    'weight': 'heavy',
+    'size': 16,
+    }
+    single_plot(x, y, 
+                None, None, None, None,
+                x_label='x [m]', y_label='y [s]', font_label=font,
+                xticks_size=font["size"], yticks_size=font["size"], 
+                xticks_color="red", yticks_color="blue",
+                my_title='$x = f(y)$', font_title=font,
+                my_color='green', line_style="dotted", width=4, my_alpha=0.5,
+                my_marker="*", marker_size=20, marker_inner_color="blue",
+                marker_outer_color="black",
+                grid=False, save=True, file_name='test.pdf')
 

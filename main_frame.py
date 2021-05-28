@@ -19,7 +19,7 @@ class Ui_MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.V_layout = QtWidgets.QVBoxLayout(self.central_widget)
-        # # Dialogs
+        # Dialogs
         self.dialog_linear = lin.Ui_Linear()
         # Create menu bar
         self.set_menu_bar()
@@ -80,9 +80,9 @@ class Ui_MainWindow(QMainWindow):
         font.setFamily("Calibri")
         font.setPointSize(12)
         font.setBold(True)
-        labels = ["Linear Plot", "Bar Plot", "Scatter Plot"
-                  "", "", ""
-                  "", "", ""
+        labels = ["Linear Plot", "Bar Plot", "Scatter Plot",
+                  "TBD", "TBD", "TBD",
+                  "TBD", "TBD", "TBD"
                   ]
         # Grid
         self.grid_layout = QtWidgets.QGridLayout()
