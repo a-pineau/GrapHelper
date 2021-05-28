@@ -1,10 +1,11 @@
 import sys
 import os
 import fun_linear as f_lin
+import canvas as canvas
 import random
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QSize, QTimer
+from PyQt5.QtCore import QSize, QTimer, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QMessageBox, 
                              QGridLayout, QWidget, QLayout, QColorDialog, QFontDialog)
@@ -12,19 +13,13 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QMessageBox,
 FONT_WEIGHTS = {12: "extralight", 25: "light", 50: "normal", 75: "bold", 81: "heavy"}
 FIGURES_DIRECTORY = os.path.join(os.getcwd(), "figures")
 
-def browse_file():
-    USER = os.environ['USERPROFILE']
-    DESK = os.path.join(USER, "Desktop")
-    data_file, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Open File", DESK, '*.txt')
-    if data_file:
-        return data_file
-
 class Ui_Linear(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("GrapHelper - Linear Plot")
         self.central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.central_widget)
+        # Grid
         self.grid_layout = QtWidgets.QGridLayout(self.central_widget)
 
         # Default grid settings values
@@ -44,7 +39,6 @@ class Ui_Linear(QMainWindow):
           "marker_inner_color": "red",
           "marker_outer_color": "black"
         }
-
         # Grid settings and miscs.
         self.grid_layout.addWidget(self.set_grid_settings_gbox(), 0, 0)
         # Plot settings
@@ -53,6 +47,7 @@ class Ui_Linear(QMainWindow):
         self.grid_layout.addWidget(self.set_open_data_gbox(),     1, 0)
         # Actions
         self.grid_layout.addWidget(self.set_actions_gbox(),       1, 1)
+        
          
     """ 
     ### SETUP METHODS 
@@ -121,8 +116,6 @@ class Ui_Linear(QMainWindow):
         # Font labels/ticks properties
         FONT_LABELS = ["Label", "Ticks"]
         TBUTTON_WIDTH = 120
-
-        self.tbuttons_color, self.tbuttons_font = [], []
         self.groupbox_font_properties = QtWidgets.QGroupBox("Label/ticks display")
         self.vbox_font_properties = QtWidgets.QVBoxLayout()
         self.iter_dict_attr = iter(self.dict_attr.keys())
@@ -144,7 +137,6 @@ class Ui_Linear(QMainWindow):
             hlayout_font.addWidget(label_font)
             hlayout_font.addWidget(tbutton_color)
             hlayout_font.addWidget(tbutton_font)
-            self.tbuttons_font.append(tbutton_font)
             # Add to local vertical layout
             self.vbox_font_properties.addLayout(hlayout_font)
 
@@ -165,9 +157,8 @@ class Ui_Linear(QMainWindow):
             self.cbox_file_ext.addItem(ext)
         self.hbox_file_name_ext.addWidget(self.label_file_ext)
         self.hbox_file_name_ext.addWidget(self.cbox_file_ext)
-        if not self.cbox_savefig.isChecked():
-            self.lineedit_file_name.setEnabled(False)
-            self.cbox_file_ext.setEnabled(False)
+        self.lineedit_file_name.setEnabled(self.cbox_savefig.isChecked())
+        self.cbox_file_ext.setEnabled(self.cbox_savefig.isChecked())
 
         # Add to group and to main vertical layout
         self.groupbox_font_properties.setLayout(self.vbox_font_properties)
@@ -181,7 +172,8 @@ class Ui_Linear(QMainWindow):
         self.group_plot_settings = QtWidgets.QGroupBox("Plot settings")
         self.vbox_plot_settings = QtWidgets.QVBoxLayout()
         self.grid_line_marker = QtWidgets.QGridLayout()
-        """ PLOT'S TITLE """
+
+        """PLOT TITLE"""
         # Title horizontal groups
         self.hbox_plot_title_1 = QtWidgets.QHBoxLayout()
         self.hbox_plot_title_2 = QtWidgets.QHBoxLayout()
@@ -198,9 +190,10 @@ class Ui_Linear(QMainWindow):
         self.hbox_plot_title_1.addWidget(self.lineedit_plot_title)
         # Add to plot title horizontal 2
         self.hbox_plot_title_2.addWidget(QtWidgets.QLabel("Title display:"))
-        self.hbox_plot_title_2.addWidget(self.qbutton_color_title)
-        self.hbox_plot_title_2.addWidget(self.qbutton_font_title)
-        """ PLOT LEGEND """
+        self.hbox_plot_title_2.addWidget(self.qbutton_color_title, stretch=1)
+        self.hbox_plot_title_2.addWidget(self.qbutton_font_title, stretch=1)
+
+        """PLOT LEGEND"""
         # Plot legend horizontal group 1
         self.hbox_plot_legend_1 = QtWidgets.QHBoxLayout()
         self.hbox_plot_legend_2 = QtWidgets.QHBoxLayout()
@@ -217,8 +210,8 @@ class Ui_Linear(QMainWindow):
         self.hbox_plot_legend_1.addWidget(self.lineedit_plot_legend)
         # Add to plot legend horizontal group 2
         self.hbox_plot_legend_2.addWidget(QtWidgets.QLabel("Legend display:"))
-        self.hbox_plot_legend_2.addWidget(self.qbutton_color_legend)
-        self.hbox_plot_legend_2.addWidget(self.qbutton_font_legend)
+        self.hbox_plot_legend_2.addWidget(self.qbutton_color_legend, stretch=1)
+        self.hbox_plot_legend_2.addWidget(self.qbutton_font_legend, stretch=1)
 
         """ LEGEND POSITION """
         POSITIONS = ["Best", "Upper right", "Upper left", "Lower left",
@@ -227,13 +220,12 @@ class Ui_Linear(QMainWindow):
         self.hbox_pos_legend = QtWidgets.QHBoxLayout()
         self.label_pos_legend = QtWidgets.QLabel("Legend position:")
         self.qcbox_pos_legend = QtWidgets.QComboBox()
-        self.qcbox_pos_legend.setFixedWidth(202)
         for pos in POSITIONS:
             self.qcbox_pos_legend.addItem(pos)
         self.hbox_pos_legend.addWidget(self.label_pos_legend)
-        self.hbox_pos_legend.addWidget(self.qcbox_pos_legend)
+        self.hbox_pos_legend.addWidget(self.qcbox_pos_legend, stretch=1)
 
-        """ LINE PROPERTIES """
+        """LINE PROPERTIES"""
         # Line horizontal groups
         self.hbox_line_properties_1 = QtWidgets.QHBoxLayout()
         self.hbox_line_properties_2 = QtWidgets.QHBoxLayout()
@@ -273,15 +265,14 @@ class Ui_Linear(QMainWindow):
         color = self.dict_attr["line_color"]
         self.pbutton_line_color.setStyleSheet(f"background-color: {color};")
         self.pbutton_line_color.setProperty("id", next(self.iter_dict_attr))
-        if self.cbox_line.isChecked() == False:
-            self.pbutton_line_color.setEnabled(False)
+        self.pbutton_line_color.setEnabled(self.cbox_line.isChecked())
         self.pbutton_line_color.clicked.connect(self.set_color)
         # Add to line horizontal group 2
         self.hbox_line_properties_2.addWidget(self.label_line_style)
         self.hbox_line_properties_2.addWidget(self.cbox_line_style)
         self.hbox_line_properties_2.addWidget(self.pbutton_line_color)
 
-        """ MARKERS PROPERTIES """
+        """MARKERS PROPERTIES"""
         # Marker horizontal groups
         self.hbox_marker_properties_1 = QtWidgets.QHBoxLayout()
         self.hbox_marker_properties_2 = QtWidgets.QHBoxLayout()
@@ -299,6 +290,7 @@ class Ui_Linear(QMainWindow):
         self.hslider_marker_size.setMaximum(20)
         self.hslider_marker_size.setTickInterval(1)
         self.hslider_marker_size.valueChanged.connect(self.set_slider_label)
+        self.hslider_marker_size.setEnabled(self.cbox_marker.isChecked())
         # Marker size label
         value = self.hslider_marker_size.value()
         self.label_marker_size = QtWidgets.QLabel(f"Size: {value}")
@@ -311,8 +303,7 @@ class Ui_Linear(QMainWindow):
         # Marker style
         self.cbox_marker_style = QtWidgets.QComboBox()
         self.cbox_marker_style.setFixedWidth(270)
-        if self.cbox_marker.isChecked() == False:
-            self.cbox_marker_style.setEnabled(False)
+        self.cbox_marker_style.setEnabled(self.cbox_marker.isChecked())
         self.MARKER_STYLES = {"Point": ".", 
             "Pixel": ",", 
             "Circle": "o", 
@@ -349,13 +340,32 @@ class Ui_Linear(QMainWindow):
         self.pbutton_marker_outer_color = QtWidgets.QPushButton("Marker outer color")
         self.pbutton_marker_outer_color.setProperty("id", next(self.iter_dict_attr))
         self.pbutton_marker_outer_color.clicked.connect(self.set_color)
-        if self.cbox_marker.isChecked() == False:
-            self.pbutton_marker_inner_color.setEnabled(False)
-            self.pbutton_marker_outer_color.setEnabled(False)
+        self.pbutton_marker_inner_color.setEnabled(self.cbox_marker.isChecked())
+        self.pbutton_marker_outer_color.setEnabled(self.cbox_marker.isChecked())
         # Add to marker horizontal group 3
         self.hbox_marker_properties_3.addWidget(self.pbutton_marker_inner_color)
         self.hbox_marker_properties_3.addWidget(self.pbutton_marker_outer_color)
         
+        """ALPHA"""
+        # Horizontal alpha group
+        self.hbox_alpha = QtWidgets.QHBoxLayout()
+        # Horizontal slider alpha
+        self.hslider_alpha = QtWidgets.QSlider()
+        self.hslider_alpha.setObjectName("slider_alpha")
+        self.hslider_alpha.setOrientation(QtCore.Qt.Horizontal)
+        self.hslider_alpha.setTickPosition(QtWidgets.QSlider.TicksBothSides)
+        self.hslider_alpha.setMinimum(0)
+        self.hslider_alpha.setMaximum(10)
+        self.hslider_alpha.setTickInterval(1)
+        self.hslider_alpha.setSliderPosition(10)
+        self.hslider_alpha.valueChanged.connect(self.set_slider_label)
+        # Alpha label
+        slider_value = self.hslider_alpha.value()
+        self.label_alpha = QtWidgets.QLabel(f"Alpha: {slider_value/10}")
+        # Add to horizontal alpha group
+        self.hbox_alpha.addWidget(self.label_alpha)
+        self.hbox_alpha.addWidget(self.hslider_alpha)
+
         # Add to vertical box
         self.vbox_plot_settings.addLayout(self.hbox_plot_title_1)
         self.vbox_plot_settings.addLayout(self.hbox_plot_title_2)
@@ -367,6 +377,7 @@ class Ui_Linear(QMainWindow):
         self.vbox_plot_settings.addLayout(self.hbox_marker_properties_1)
         self.vbox_plot_settings.addLayout(self.hbox_marker_properties_2)
         self.vbox_plot_settings.addLayout(self.hbox_marker_properties_3)
+        self.vbox_plot_settings.addLayout(self.hbox_alpha)
 
         # Add to vertical layout
         self.group_plot_settings.setLayout(self.vbox_plot_settings)
@@ -374,16 +385,18 @@ class Ui_Linear(QMainWindow):
 
     def set_open_data_gbox(self):
         GROUP_LABELS = ["Open file", "Add data"]
-        GROUP_CMDS = [browse_file, browse_file]
-        BUTTON_W, BUTTON_H = 170, 80
+        GROUP_CMDS = [self.browse_file, self.open_data_frame]
         self.group_import_data = QtWidgets.QGroupBox("Import data")
         self.group_import_data.setFixedHeight(120)
         self.v_import_data = QtWidgets.QHBoxLayout()
         self.v_import_data.setAlignment(QtCore.Qt.AlignCenter)
         for i in range(len(GROUP_LABELS)):
             Pbutton_plot = QtWidgets.QPushButton(f"{GROUP_LABELS[i]}")
-            Pbutton_plot.setFixedSize(BUTTON_W, BUTTON_H)
             Pbutton_plot.clicked.connect(GROUP_CMDS[i])
+            size_policy = Pbutton_plot.sizePolicy()
+            size_policy.setHorizontalPolicy(QtWidgets.QSizePolicy.Expanding)
+            size_policy.setVerticalPolicy(QtWidgets.QSizePolicy.Expanding)
+            Pbutton_plot.setSizePolicy(size_policy)
             # Add to vertical layout
             self.v_import_data.addWidget(Pbutton_plot)
              
@@ -392,16 +405,17 @@ class Ui_Linear(QMainWindow):
 
     def set_actions_gbox(self):  
         GROUP_LABELS = ["Plot data", "Test case"]
-        GROUP_CMDS = [browse_file, self.test_case]
-        BUTTON_W, BUTTON_H = 150, 80
+        GROUP_CMDS = [self.browse_file, self.test_case]
         self.group_actions = QtWidgets.QGroupBox("Actions")
-        self.group_actions.setFixedHeight(120)
         self.v_actions = QtWidgets.QHBoxLayout()
         self.v_actions.setAlignment(QtCore.Qt.AlignCenter)
         for i in range(len(GROUP_LABELS)):
             Pbutton_plot = QtWidgets.QPushButton(GROUP_LABELS[i])
-            Pbutton_plot.setFixedSize(BUTTON_W, BUTTON_H)
             Pbutton_plot.clicked.connect(GROUP_CMDS[i])
+            size_policy = Pbutton_plot.sizePolicy()
+            size_policy.setHorizontalPolicy(QtWidgets.QSizePolicy.Expanding)
+            size_policy.setVerticalPolicy(QtWidgets.QSizePolicy.Expanding)
+            Pbutton_plot.setSizePolicy(size_policy)
             # Add to vertical layout
             self.v_actions.addWidget(Pbutton_plot)
 
@@ -411,6 +425,7 @@ class Ui_Linear(QMainWindow):
     """ 
     ### CONNECTED METHODS 
     """
+    @pyqtSlot()
     def change_state(self):
         sender = self.sender()
         state = sender.isChecked()
@@ -428,6 +443,7 @@ class Ui_Linear(QMainWindow):
             self.cbox_file_ext.setEnabled(state)
             self.lineedit_file_name.setEnabled(state)
 
+    @pyqtSlot()
     def set_color(self):
         pbutton = self.sender()
         color = QColorDialog.getColor()
@@ -435,27 +451,38 @@ class Ui_Linear(QMainWindow):
             self.dict_attr[pbutton.property("id")] = color.name()
             pbutton.setStyleSheet(f"background-color: {color.name()};")
 
+    @pyqtSlot()
     def set_font(self):
         pbutton = self.sender()
         font, font_selected = QFontDialog.getFont()
         if font_selected:
             self.dict_attr[pbutton.property("id")] = font
 
+    @pyqtSlot()
     def set_slider_label(self):
         name = self.sender().objectName()
-        value = self.sender().value()
+        slider_value = self.sender().value()
         if name == "slider_line_width":
-            self.label_line_width.setText(f"Width: {value}")
-        else:
-            self.label_marker_size.setText(f"Size: {value}")
+            self.label_line_width.setText(f"Width: {slider_value}")
+        elif name == "slider_marker_size":
+            self.label_marker_size.setText(f"Size: {slider_value}")
+        elif name == "slider_alpha":
+            self.label_alpha.setText(f'Alpha: {slider_value/10}')
 
-    """ PLOT METHODS """
+    @pyqtSlot()
+    def open_data_frame(self):
+        pass
+
+    """PLOT METHODS"""
+    @pyqtSlot()
     def test_case(self):
-        """ INITIALIZE ALL THE NEEDED VALUES FIRST """
-        # Plit title
+        """INITIALIZE ALL THE NEEDED VALUES FIRST"""
+        # Plot title
         plot_title = self.lineedit_plot_title.text()
         # Plot legend
         plot_legend = self.lineedit_plot_legend.text()
+        # Plot legend location
+        plot_legend_location = self.qcbox_pos_legend.currentText().lower()
         # x and y labels
         xlabel = self.lineedit_xaxis_label.text()
         ylabel = self.lineedit_yaxis_label.text()
@@ -518,6 +545,8 @@ class Ui_Linear(QMainWindow):
         else:
             marker_style = marker_size = None
             marker_inner_color = marker_outer_color = None
+        # Alpha
+        alpha = self.hslider_alpha.value()/10
         # File name
         if save_fig:
             file_name = self.lineedit_file_name.text()
@@ -529,21 +558,31 @@ class Ui_Linear(QMainWindow):
         else:
             FILE_PATH = None
 
-
-        x = sorted([random.randint(0, x) for x in range(0, 100)])
-        y = sorted([random.randint(0, x) for x in range(0, 100)])
+        print(FILE_PATH)
+        x = sorted([random.randint(0, 200) for _ in range(0, 150)])
+        y = sorted([random.randint(0, 200) for _ in range(0, 150)])
         """ FINALLY PLOTS THE DATA """
         f_lin.single_plot(x, y, 
                           x_min, x_max, y_min, y_max,
                           xlabel, ylabel, dict_label_font,
+                          plot_legend, plot_legend_location,
                           xticks_size, yticks_size,
                           xticks_color, yticks_color,
                           plot_title, dict_title_font, 
-                          line_color, line_style, line_width, 1, 
+                          line_color, line_style, line_width, alpha,
                           marker_style, marker_size,
                           marker_inner_color, marker_outer_color,
                           grid, save_fig, FILE_PATH
                           )
+
+    """STATIC METHODS"""
+    @staticmethod
+    def browse_file():
+        USER = os.environ['USERPROFILE']
+        DESK = os.path.join(USER, "Desktop")
+        data_file, _ = QtWidgets.QFileDialog.getOpenFileName(None, "Open File", DESK, '*.txt')
+        if data_file:
+            return data_file    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -9,7 +9,8 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # TODO: add ticks parameters?
 def single_plot(x, y,
                 xmin, xmax, ymin, ymax,
-                x_label, y_label, font_label,
+                x_label, y_label, font_label, 
+                my_legend, my_loc,
                 xticks_size, yticks_size,
                 xticks_color, yticks_color,
                 my_title, font_title,
@@ -45,20 +46,23 @@ def single_plot(x, y,
     ax.plot(x, y,
             color=my_color, linestyle=line_style, linewidth=width, 
             alpha=my_alpha,
-            marker=my_marker, markersize=marker_size, markerfacecolor=marker_inner_color,
+            marker=my_marker, markersize=marker_size, 
+            markerfacecolor=marker_inner_color,
             markeredgecolor=marker_outer_color)
-
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     ax.set_xlabel(x_label, fontdict=font_label)
     ax.set_ylabel(y_label, fontdict=font_label)
     ax.set_title(my_title, fontdict=font_title)
+    ax.legend([my_legend], loc=my_loc)
 
     ax.tick_params(axis='x', labelsize=xticks_size, colors=xticks_color)
     ax.tick_params(axis='y', labelsize=yticks_size, colors=yticks_color)
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
 
     if grid: ax.grid()
-    if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.025)
+    if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.05)
 
     # display
     plt.show()
@@ -67,8 +71,6 @@ def single_plot(x, y,
 if __name__ == '__main__':
     x = sorted([random.randint(0, x) for x in range(0, 100)])
     y = sorted([random.randint(0, x) for x in range(0, 100)])
-    print(x)
-    print(y)
     font = {'family': 'serif',
     'color':  'darkred',
     'weight': 'heavy',
@@ -76,7 +78,8 @@ if __name__ == '__main__':
     }
     single_plot(x, y, 
                 None, None, None, None,
-                x_label='x [m]', y_label='y [s]', font_label=font,
+                x_label='x [m]', y_label='y [s]', font_label=font, 
+                my_legend="My legend", my_loc="best",
                 xticks_size=font["size"], yticks_size=font["size"], 
                 xticks_color="red", yticks_color="blue",
                 my_title='$x = f(y)$', font_title=font,
