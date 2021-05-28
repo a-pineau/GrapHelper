@@ -7,7 +7,7 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 
 # markers list: https://matplotlib.org/stable/api/markers_api.html
 # TODO: add ticks parameters?
-def single_plot(x, y,
+def line_plot(x, y,
                 xmin, xmax, ymin, ymax,
                 x_label, y_label, font_label, 
                 my_legend, my_loc,
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     'weight': 'heavy',
     'size': 16,
     }
-    single_plot(x, y, 
+    line_plot(x, y, 
                 None, None, None, None,
                 x_label='x [m]', y_label='y [s]', font_label=font, 
                 my_legend="My legend", my_loc="best",

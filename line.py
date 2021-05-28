@@ -1,6 +1,6 @@
 import sys
 import os
-import fun_linear as f_lin
+import fun_line as f_line
 import canvas as canvas
 import random
 
@@ -13,10 +13,10 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QMessageBox,
 FONT_WEIGHTS = {12: "extralight", 25: "light", 50: "normal", 75: "bold", 81: "heavy"}
 FIGURES_DIRECTORY = os.path.join(os.getcwd(), "figures")
 
-class Ui_Linear(QMainWindow):
+class Ui_line(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("GrapHelper - Linear Plot")
+        self.setWindowTitle("GrapHelper - line Plot")
         self.central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.central_widget)
         # Grid
@@ -562,7 +562,7 @@ class Ui_Linear(QMainWindow):
         x = sorted([random.randint(0, 200) for _ in range(0, 150)])
         y = sorted([random.randint(0, 200) for _ in range(0, 150)])
         """ FINALLY PLOTS THE DATA """
-        f_lin.single_plot(x, y, 
+        f_line.line_plot(x, y, 
                           x_min, x_max, y_min, y_max,
                           xlabel, ylabel, dict_label_font,
                           plot_legend, plot_legend_location,
@@ -586,7 +586,7 @@ class Ui_Linear(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = Ui_Linear()
+    win = Ui_line()
     win.show()
     sys.exit(app.exec_())
 
