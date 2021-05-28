@@ -227,7 +227,7 @@ class Ui_Linear(QMainWindow):
         self.hbox_pos_legend = QtWidgets.QHBoxLayout()
         self.label_pos_legend = QtWidgets.QLabel("Legend position:")
         self.qcbox_pos_legend = QtWidgets.QComboBox()
-        self.qcbox_pos_legend.setFixedWidth(150)
+        self.qcbox_pos_legend.setFixedWidth(202)
         for pos in POSITIONS:
             self.qcbox_pos_legend.addItem(pos)
         self.hbox_pos_legend.addWidget(self.label_pos_legend)
@@ -269,6 +269,7 @@ class Ui_Linear(QMainWindow):
         self.cbox_line_style.setFixedWidth(130)
         # Line colors
         self.pbutton_line_color = QtWidgets.QPushButton("Line color")
+        self.pbutton_line_color.setFixedWidth(110)
         color = self.dict_attr["line_color"]
         self.pbutton_line_color.setStyleSheet(f"background-color: {color};")
         self.pbutton_line_color.setProperty("id", next(self.iter_dict_attr))
@@ -309,7 +310,7 @@ class Ui_Linear(QMainWindow):
         self.label_marker_style = QtWidgets.QLabel("Style:")
         # Marker style
         self.cbox_marker_style = QtWidgets.QComboBox()
-        self.cbox_marker_style.setFixedWidth(250)
+        self.cbox_marker_style.setFixedWidth(270)
         if self.cbox_marker.isChecked() == False:
             self.cbox_marker_style.setEnabled(False)
         self.MARKER_STYLES = {"Point": ".", 
