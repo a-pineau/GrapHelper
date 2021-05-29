@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
 
 from matplotlib import rcParams
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
@@ -8,16 +9,16 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # markers list: https://matplotlib.org/stable/api/markers_api.html
 # TODO: add ticks parameters?
 def line_plot(x, y,
-                xmin, xmax, ymin, ymax,
-                x_label, y_label, font_label, 
-                my_legend, my_loc,
-                xticks_size, yticks_size,
-                xticks_color, yticks_color,
-                my_title, font_title,
-                my_color, line_style, width, my_alpha,   
-                my_marker, marker_size, marker_inner_color, marker_outer_color,
-                grid, save, file_name
-                ):
+        xmin, xmax, ymin, ymax,
+        x_label, y_label,
+        label_color, label_size,
+        my_legend, my_loc, legend_size,
+        ticks_color, ticks_size,
+        my_title, title_color, title_size,
+        my_color, line_style, width, my_alpha,   
+        my_marker, marker_size, marker_inner_color, marker_outer_color,
+        grid, save, latex, file_name
+        ):
     """
     A helper function to make a simple plot
     Parameters:
@@ -41,25 +42,31 @@ def line_plot(x, y,
     Returns: None
     -------
     """
+    if latex:
+        rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+        rc('text', usetex=True)
     fig, ax = plt.subplots(constrained_layout=True)
-
     ax.plot(x, y,
             color=my_color, linestyle=line_style, linewidth=width, 
             alpha=my_alpha,
             marker=my_marker, markersize=marker_size, 
             markerfacecolor=marker_inner_color,
             markeredgecolor=marker_outer_color)
+    # Axes limits
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
-    ax.set_xlabel(x_label, fontdict=font_label)
-    ax.set_ylabel(y_label, fontdict=font_label)
-    ax.set_title(my_title, fontdict=font_title)
-    ax.legend([my_legend], loc=my_loc)
-
-    ax.tick_params(axis='x', labelsize=xticks_size, colors=xticks_color)
-    ax.tick_params(axis='y', labelsize=yticks_size, colors=yticks_color)
+    # Label
+    ax.set_xlabel(x_label, fontsize=label_size, color=label_color)
+    ax.set_ylabel(y_label, fontsize=label_size, color=label_color)
+    # Ticks
+    ax.tick_params(axis='x', labelsize=ticks_size, colors=ticks_color)
+    ax.tick_params(axis='y', labelsize=ticks_size, colors=ticks_color)
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
+    # Title
+    ax.set_title(my_title, fontsize=title_size, color=title_color)
+    # Legend
+    ax.legend([my_legend], loc=my_loc, prop={"size": legend_size})
 
     if grid: ax.grid()
     if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.05)
@@ -67,24 +74,4 @@ def line_plot(x, y,
     # display
     plt.show()
 
-# tests
-if __name__ == '__main__':
-    x = sorted([random.randint(0, x) for x in range(0, 100)])
-    y = sorted([random.randint(0, x) for x in range(0, 100)])
-    font = {'family': 'serif',
-    'color':  'darkred',
-    'weight': 'heavy',
-    'size': 16,
-    }
-    line_plot(x, y, 
-                None, None, None, None,
-                x_label='x [m]', y_label='y [s]', font_label=font, 
-                my_legend="My legend", my_loc="best",
-                xticks_size=font["size"], yticks_size=font["size"], 
-                xticks_color="red", yticks_color="blue",
-                my_title='$x = f(y)$', font_title=font,
-                my_color='green', line_style="dotted", width=4, my_alpha=0.5,
-                my_marker="*", marker_size=20, marker_inner_color="blue",
-                marker_outer_color="black",
-                grid=False, save=True, file_name='test.pdf')
 

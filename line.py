@@ -23,22 +23,15 @@ class Ui_line(QMainWindow):
         self.grid_layout = QtWidgets.QGridLayout(self.central_widget)
 
         # Default grid settings values
-        default_font = QtGui.QFont()
-        default_font.setFamily("Times")
-        default_font.setPointSize(16)
         self.dict_attr = {
           "label_color": "black", 
-          "label_font": default_font,
           "ticks_color": "black",
-          "ticks_font": default_font,
           "title_color": "black",
-          "title_font": default_font,
-          "legend_color": "black",
-          "legend_font": default_font,
           "line_color": "blue",
           "marker_inner_color": "red",
           "marker_outer_color": "black"
         }
+        self.iter_dict_attr = iter(self.dict_attr)
         # Grid settings and miscs.
         self.grid_layout.addWidget(self.set_grid_settings_gbox(), 0, 0)
         # Plot settings
@@ -114,31 +107,56 @@ class Ui_line(QMainWindow):
         self.v_box.addLayout(self.hgroup_x_limits)
         self.v_box.addLayout(self.hgroup_y_limits)
         # Font labels/ticks properties
-        FONT_LABELS = ["Label", "Ticks"]
-        TBUTTON_WIDTH = 120
         self.groupbox_font_properties = QtWidgets.QGroupBox("Label/ticks display")
         self.vbox_font_properties = QtWidgets.QVBoxLayout()
-        self.iter_dict_attr = iter(self.dict_attr.keys())
+        self.vbox_font_properties.setAlignment(QtCore.Qt.AlignCenter)
         
-        for elem in FONT_LABELS:
-            hlayout_font = QtWidgets.QHBoxLayout()
-            label_font = QtWidgets.QLabel(f"{elem} style:")
-            # Color
-            tbutton_color = QtWidgets.QPushButton(text="Color")
-            tbutton_color.setFixedWidth(TBUTTON_WIDTH)
-            tbutton_color.setProperty("id", next(self.iter_dict_attr))
-            tbutton_color.clicked.connect(self.set_color)
-            # Font
-            tbutton_font = QtWidgets.QPushButton(text="Font")
-            tbutton_font.setFixedWidth(TBUTTON_WIDTH)
-            tbutton_font.setProperty("id", next(self.iter_dict_attr))
-            tbutton_font.clicked.connect(self.set_font)
-            # Add to horizontal layout
-            hlayout_font.addWidget(label_font)
-            hlayout_font.addWidget(tbutton_color)
-            hlayout_font.addWidget(tbutton_font)
-            # Add to local vertical layout
-            self.vbox_font_properties.addLayout(hlayout_font)
+        iter_dict = iter(self.dict_attr)
+        # Horizontal group 1 for label
+        self.hlayout_font_1 = QtWidgets.QHBoxLayout()
+        self.label_style = QtWidgets.QLabel("Label:")
+        # Color
+        self.tbutton_label_color = QtWidgets.QPushButton(text="Color")
+        self.tbutton_label_color.setProperty("id", next(self.iter_dict_attr))
+        self.tbutton_label_color.clicked.connect(self.set_color)
+        # Label size
+        self.label_size = QtWidgets.QLabel("Font size:")
+        # Spinbox label size
+        self.sbox_label_size = QtWidgets.QSpinBox()
+        self.sbox_label_size.setMinimum(1)
+        self.sbox_label_size.setMaximum(50)
+        self.sbox_label_size.setValue(14)
+        self.sbox_label_size.setSingleStep(1)
+        # Add to horizontal layout
+        self.hlayout_font_1.addWidget(self.label_style)
+        self.hlayout_font_1.addWidget(self.tbutton_label_color, stretch=1)
+        self.hlayout_font_1.addWidget(self.label_size)
+        self.hlayout_font_1.addWidget(self.sbox_label_size)
+
+        # Horizontal group 2 for ticks
+        self.hlayout_font_2 = QtWidgets.QHBoxLayout()
+        self.ticks_style = QtWidgets.QLabel("Ticks: ")
+        # Color
+        self.tbutton_ticks_color = QtWidgets.QPushButton(text="Color")
+        self.tbutton_ticks_color.setProperty("id", next(self.iter_dict_attr))
+        self.tbutton_ticks_color.clicked.connect(self.set_color)
+        # Label size
+        self.ticks_size = QtWidgets.QLabel("Font size:")
+        # Spinbox label size
+        self.sbox_ticks_size = QtWidgets.QSpinBox()
+        self.sbox_ticks_size.setMinimum(1)
+        self.sbox_ticks_size.setMaximum(50)
+        self.sbox_ticks_size.setValue(14)
+        self.sbox_ticks_size.setSingleStep(1)
+        # Add to horizontal layout
+        self.hlayout_font_2.addWidget(self.ticks_style)
+        self.hlayout_font_2.addWidget(self.tbutton_ticks_color, stretch=1)
+        self.hlayout_font_2.addWidget(self.ticks_size)
+        self.hlayout_font_2.addWidget(self.sbox_ticks_size)
+
+        # Add to local vertical layout
+        self.vbox_font_properties.addLayout(self.hlayout_font_1)
+        self.vbox_font_properties.addLayout(self.hlayout_font_2)
 
         # Save figure
         self.cbox_savefig = QtWidgets.QCheckBox("Save figure to current directory")
@@ -182,16 +200,22 @@ class Ui_line(QMainWindow):
         self.qbutton_color_title = QtWidgets.QPushButton("Color")
         self.qbutton_color_title.setProperty("id", next(self.iter_dict_attr))
         self.qbutton_color_title.clicked.connect(self.set_color)
-        self.qbutton_font_title = QtWidgets.QPushButton("Font")
-        self.qbutton_font_title.setProperty("id", next(self.iter_dict_attr))
-        self.qbutton_font_title.clicked.connect(self.set_font)
+        # Label size title
+        self.label_size_title = QtWidgets.QLabel("Font size:")
+        # Spinbox title size
+        self.sbox_title_size = QtWidgets.QSpinBox()
+        self.sbox_title_size.setMinimum(1)
+        self.sbox_title_size.setMaximum(50)
+        self.sbox_title_size.setValue(14)
+        self.sbox_title_size.setSingleStep(1)
         # Add to plot title horizontal 1
         self.hbox_plot_title_1.addWidget(self.label_plot_title)
         self.hbox_plot_title_1.addWidget(self.lineedit_plot_title)
         # Add to plot title horizontal 2
-        self.hbox_plot_title_2.addWidget(QtWidgets.QLabel("Title display:"))
+        self.hbox_plot_title_2.addWidget(QtWidgets.QLabel("Title color:"))
         self.hbox_plot_title_2.addWidget(self.qbutton_color_title, stretch=1)
-        self.hbox_plot_title_2.addWidget(self.qbutton_font_title, stretch=1)
+        self.hbox_plot_title_2.addWidget(self.label_size_title)
+        self.hbox_plot_title_2.addWidget(self.sbox_title_size)
 
         """PLOT LEGEND"""
         # Plot legend horizontal group 1
@@ -199,19 +223,23 @@ class Ui_line(QMainWindow):
         self.hbox_plot_legend_2 = QtWidgets.QHBoxLayout()
         self.label_plot_legend = QtWidgets.QLabel("Plot legend:")
         self.lineedit_plot_legend = QtWidgets.QLineEdit("My legend")
-        self.qbutton_color_legend = QtWidgets.QPushButton("Color")
-        self.qbutton_color_legend.setProperty("id", next(self.iter_dict_attr))
-        self.qbutton_color_legend.clicked.connect(self.set_color)
-        self.qbutton_font_legend = QtWidgets.QPushButton("Font")
-        self.qbutton_font_legend.setProperty("id", next(self.iter_dict_attr))
-        self.qbutton_font_legend.clicked.connect(self.set_font)
+        # Label legend font size
+        self.label_legend_size = QtWidgets.QLabel("Font size:")
+        # Checkbox match legend color
+        self.cbox_match_legend_color = QtWidgets.QCheckBox("Match legend color")
+        # Spinbox title size
+        self.sbox_legend_size = QtWidgets.QSpinBox()
+        self.sbox_legend_size.setMinimum(1)
+        self.sbox_legend_size.setMaximum(50)
+        self.sbox_legend_size.setValue(14)
+        self.sbox_legend_size.setSingleStep(1)
         # Add to plot legend horizontal group 1
         self.hbox_plot_legend_1.addWidget(self.label_plot_legend)
         self.hbox_plot_legend_1.addWidget(self.lineedit_plot_legend)
         # Add to plot legend horizontal group 2
-        self.hbox_plot_legend_2.addWidget(QtWidgets.QLabel("Legend display:"))
-        self.hbox_plot_legend_2.addWidget(self.qbutton_color_legend, stretch=1)
-        self.hbox_plot_legend_2.addWidget(self.qbutton_font_legend, stretch=1)
+        self.hbox_plot_legend_2.addWidget(self.cbox_match_legend_color)
+        self.hbox_plot_legend_2.addWidget(self.label_legend_size)
+        self.hbox_plot_legend_2.addWidget(self.sbox_legend_size, stretch=1)
 
         """ LEGEND POSITION """
         POSITIONS = ["Best", "Upper right", "Upper left", "Lower left",
@@ -497,35 +525,16 @@ class Ui_line(QMainWindow):
         else:
             x_min = x_max = y_min = y_max = None
         # Dict data
-        label_font = self.dict_attr["label_font"]
         label_color = self.dict_attr["label_color"]
-        ticks_font = self.dict_attr["ticks_font"]
         ticks_color = self.dict_attr["ticks_color"]
-        title_font = self.dict_attr["title_font"]
         title_color = self.dict_attr["title_color"]
-        legend_font = self.dict_attr["legend_font"]
-        legend_color = self.dict_attr["legend_color"]
-        # Defining dict for matplotlib compatibility
-        dict_label_font = {'family': label_font.family(),
-           'color':  label_color,
-           'weight': FONT_WEIGHTS[label_font.weight()],
-           'size':   label_font.pointSize()
-           }
-        dict_title_font = {'family': title_font.family(),
-           'color':  title_color,
-           'weight': FONT_WEIGHTS[title_font.weight()],
-           'size':   title_font.pointSize()
-           }
-        # Unused?
-        dict_legend_font = {'family': legend_font.family(),
-           'color':  legend_color,
-           'weight': FONT_WEIGHTS[legend_font.weight()],
-           'size':   legend_font.pointSize()
-           }
-        # ticks font cannot be set using a dictionnary in matplotlib
-        xticks_size = yticks_size = ticks_font.pointSize()
-        xticks_color = yticks_color = ticks_color
+        # Label, ticks, title, legend sizes
+        label_size = self.sbox_label_size.value()
+        ticks_size = self.sbox_ticks_size.value()
+        title_size = self.sbox_title_size.value()
+        legend_size = self.sbox_legend_size.value()
         # Check boxes data
+        latex = self.box_latex.isChecked()
         grid = self.box_grid.isChecked()
         save_fig = self.cbox_savefig.isChecked()
         # Line style
@@ -558,22 +567,22 @@ class Ui_line(QMainWindow):
         else:
             FILE_PATH = None
 
-        print(FILE_PATH)
         x = sorted([random.randint(0, 200) for _ in range(0, 150)])
         y = sorted([random.randint(0, 200) for _ in range(0, 150)])
         """ FINALLY PLOTS THE DATA """
-        f_line.line_plot(x, y, 
-                          x_min, x_max, y_min, y_max,
-                          xlabel, ylabel, dict_label_font,
-                          plot_legend, plot_legend_location,
-                          xticks_size, yticks_size,
-                          xticks_color, yticks_color,
-                          plot_title, dict_title_font, 
-                          line_color, line_style, line_width, alpha,
-                          marker_style, marker_size,
-                          marker_inner_color, marker_outer_color,
-                          grid, save_fig, FILE_PATH
-                          )
+        f_line.line_plot(
+                x, y, 
+                x_min, x_max, y_min, y_max,
+                xlabel, ylabel,
+                label_color, label_size,
+                plot_legend, plot_legend_location, legend_size,
+                ticks_color, ticks_size,
+                plot_title, title_color, title_size,
+                line_color, line_style, line_width, alpha,
+                marker_style, marker_size,
+                marker_inner_color, marker_outer_color,
+                grid, save_fig, latex, FILE_PATH
+            )
 
     """STATIC METHODS"""
     @staticmethod
@@ -588,5 +597,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Ui_line()
     win.show()
+    app.setStyle("Breeze")
+    print(QtWidgets.QStyleFactory.keys())
     sys.exit(app.exec_())
 
