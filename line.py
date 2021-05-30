@@ -11,7 +11,11 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QMessageBox,
                              QGridLayout, QWidget, QLayout, QColorDialog, QFontDialog)
 
 FONT_WEIGHTS = {12: "extralight", 25: "light", 50: "normal", 75: "bold", 81: "heavy"}
-FIGURES_DIRECTORY = os.path.join(os.getcwd(), "figures")
+FILE_DIR = os.path.dirname(__file__)
+FIGURES_DIR = os.path.join(FILE_DIR, "figures")
+IMAGES_DIR = os.path.join(FILE_DIR, "images")
+ICON_PLOT_TEST_CASE = os.path.join(IMAGES_DIR, "bomb.png")
+ICON_DEFAULT_SETTINGS = os.path.join(IMAGES_DIR, "default_settings.png")
 
 class Ui_line(QMainWindow):
     def __init__(self):
@@ -22,7 +26,7 @@ class Ui_line(QMainWindow):
         # Grid
         self.grid_layout = QtWidgets.QGridLayout(self.central_widget)
 
-        # Default grid settings values
+        # Color push buttons values
         self.dict_attr = {
           "label_color": "black", 
           "ticks_color": "black",
@@ -31,20 +35,35 @@ class Ui_line(QMainWindow):
           "marker_inner_color": "red",
           "marker_outer_color": "black"
         }
+        # Tool bar
+        self._set_toolbar()
         self.iter_dict_attr = iter(self.dict_attr)
         # Grid settings and miscs.
         self.grid_layout.addWidget(self.set_grid_settings_gbox(), 0, 0)
         # Plot settings
         self.grid_layout.addWidget(self.set_plot_settings_gbox(), 0, 1)
-        # Import data
-        self.grid_layout.addWidget(self.set_open_data_gbox(),     1, 0)
-        # Actions
-        self.grid_layout.addWidget(self.set_actions_gbox(),       1, 1)
+        # # Import data
+        # self.grid_layout.addWidget(self.set_open_data_gbox(),     1, 0)
+        # # Actions
+        # self.grid_layout.addWidget(self.set_actions_gbox(),       1, 1)
         
          
     """ 
     ### SETUP METHODS 
     """
+    def _set_toolbar(self):
+        icon_test_case = QtGui.QIcon(ICON_PLOT_TEST_CASE)
+        icon_default_settings = QtGui.QIcon(ICON_DEFAULT_SETTINGS)
+        test_case = QtWidgets.QAction(icon_test_case, "Plot test case", self)
+        default_settings = QtWidgets.QAction(icon_default_settings, "Default settings", self)
+        test_case.triggered.connect(self.test_case)
+        test_case.triggered.connect(self._default_settings)
+        self.toolbar= self.addToolBar("Plot test case")
+        self.toolbar.setIconSize(QtCore.QSize(50, 50))
+        self.toolbar.addAction(test_case)
+        self.toolbar.addAction(default_settings)
+
+
     def set_grid_settings_gbox(self):
         self.group_box = QtWidgets.QGroupBox("Grid settings and miscellaneous")
         self.v_box = QtWidgets.QVBoxLayout()
@@ -61,41 +80,37 @@ class Ui_line(QMainWindow):
         # x axis label horizontal group
         self.hgroup_xaxis_label = QtWidgets.QHBoxLayout()
         # x-axis label
-        self.label_xaxis = QtWidgets.QLabel("x-axis label:")
-        self.hgroup_xaxis_label.addWidget(self.label_xaxis)
+        self.hgroup_xaxis_label.addWidget(QtWidgets.QLabel("x-axis label:"))
         # x-axis label line edit
         self.lineedit_xaxis_label = QtWidgets.QLineEdit("My x label")
         self.hgroup_xaxis_label.addWidget(self.lineedit_xaxis_label)
         # y axis label horizontal group
         self.hgroup_yaxis_label = QtWidgets.QHBoxLayout()
         # y-axis label
-        self.label_yaxis = QtWidgets.QLabel("y-axis label:")
-        self.hgroup_yaxis_label.addWidget(self.label_yaxis)
+        self.hgroup_yaxis_label.addWidget(QtWidgets.QLabel("y-axis label:"))
         # y-axis label line edit
         self.lineedit_yaxis_label = QtWidgets.QLineEdit("My y label")
         self.hgroup_yaxis_label.addWidget(self.lineedit_yaxis_label)
         # x limits horizontal group
         self.hgroup_x_limits = QtWidgets.QHBoxLayout()
         # x limits (min/max) label
-        self.label_x_limits = QtWidgets.QLabel("x limits (min/max)")
+        self.hgroup_x_limits.addWidget(QtWidgets.QLabel("x limits (min/max)"))
         # x limits (min) values lineedit
         self.lineedit_x_min = QtWidgets.QLineEdit()
         # x limits (max) values lineedit
         self.lineedit_x_max = QtWidgets.QLineEdit()
         # Add to x limits horizontal group
-        self.hgroup_x_limits.addWidget(self.label_x_limits)
         self.hgroup_x_limits.addWidget(self.lineedit_x_min)
         self.hgroup_x_limits.addWidget(self.lineedit_x_max)
         # y limits horizontal group
         self.hgroup_y_limits = QtWidgets.QHBoxLayout()
         # y limits (min/max) label
-        self.label_y_limits = QtWidgets.QLabel("y limits (min/max)")
+        self.hgroup_y_limits.addWidget(QtWidgets.QLabel("y limits (min/max)"))
         # y limits (min) values lineedit
         self.lineedit_y_min = QtWidgets.QLineEdit()
         # y limits (max) values lineedit
         self.lineedit_y_max = QtWidgets.QLineEdit()
         # Add to y limits horizontal group
-        self.hgroup_y_limits.addWidget(self.label_y_limits)
         self.hgroup_y_limits.addWidget(self.lineedit_y_min)
         self.hgroup_y_limits.addWidget(self.lineedit_y_max)
         # Add to vertical layout
@@ -114,13 +129,11 @@ class Ui_line(QMainWindow):
         iter_dict = iter(self.dict_attr)
         # Horizontal group 1 for label
         self.hlayout_font_1 = QtWidgets.QHBoxLayout()
-        self.label_style = QtWidgets.QLabel("Label:")
         # Color
         self.tbutton_label_color = QtWidgets.QPushButton(text="Color")
         self.tbutton_label_color.setProperty("id", next(self.iter_dict_attr))
         self.tbutton_label_color.clicked.connect(self.set_color)
         # Label size
-        self.label_size = QtWidgets.QLabel("Font size:")
         # Spinbox label size
         self.sbox_label_size = QtWidgets.QSpinBox()
         self.sbox_label_size.setMinimum(1)
@@ -128,20 +141,18 @@ class Ui_line(QMainWindow):
         self.sbox_label_size.setValue(14)
         self.sbox_label_size.setSingleStep(1)
         # Add to horizontal layout
-        self.hlayout_font_1.addWidget(self.label_style)
+        self.hlayout_font_1.addWidget(QtWidgets.QLabel("Label:"))
         self.hlayout_font_1.addWidget(self.tbutton_label_color, stretch=1)
-        self.hlayout_font_1.addWidget(self.label_size)
+        self.hlayout_font_1.addWidget(QtWidgets.QLabel("Font size:"))
         self.hlayout_font_1.addWidget(self.sbox_label_size)
 
         # Horizontal group 2 for ticks
         self.hlayout_font_2 = QtWidgets.QHBoxLayout()
-        self.ticks_style = QtWidgets.QLabel("Ticks: ")
         # Color
         self.tbutton_ticks_color = QtWidgets.QPushButton(text="Color")
         self.tbutton_ticks_color.setProperty("id", next(self.iter_dict_attr))
         self.tbutton_ticks_color.clicked.connect(self.set_color)
         # Label size
-        self.ticks_size = QtWidgets.QLabel("Font size:")
         # Spinbox label size
         self.sbox_ticks_size = QtWidgets.QSpinBox()
         self.sbox_ticks_size.setMinimum(1)
@@ -149,9 +160,9 @@ class Ui_line(QMainWindow):
         self.sbox_ticks_size.setValue(14)
         self.sbox_ticks_size.setSingleStep(1)
         # Add to horizontal layout
-        self.hlayout_font_2.addWidget(self.ticks_style)
+        self.hlayout_font_2.addWidget(QtWidgets.QLabel("Ticks: "))
         self.hlayout_font_2.addWidget(self.tbutton_ticks_color, stretch=1)
-        self.hlayout_font_2.addWidget(self.ticks_size)
+        self.hlayout_font_2.addWidget(QtWidgets.QLabel("Font size: "))
         self.hlayout_font_2.addWidget(self.sbox_ticks_size)
 
         # Add to local vertical layout
@@ -163,17 +174,15 @@ class Ui_line(QMainWindow):
         self.cbox_savefig.clicked.connect(self.change_state)
         # File name
         self.hbox_file_name_ext = QtWidgets.QHBoxLayout()
-        self.label_file_name = QtWidgets.QLabel("File name:")
         self.lineedit_file_name = QtWidgets.QLineEdit()
-        self.hbox_file_name_ext.addWidget(self.label_file_name)
+        self.hbox_file_name_ext.addWidget(QtWidgets.QLabel("File name:"))
         self.hbox_file_name_ext.addWidget(self.lineedit_file_name)
         # File extension
         EXTENSIONS = ["PDF", "JPG", "PNG", "BMP"]
-        self.label_file_ext = QtWidgets.QLabel("Extension:")
         self.cbox_file_ext = QtWidgets.QComboBox()
         for ext in EXTENSIONS:
             self.cbox_file_ext.addItem(ext)
-        self.hbox_file_name_ext.addWidget(self.label_file_ext)
+        self.hbox_file_name_ext.addWidget(QtWidgets.QLabel("Extension:"))
         self.hbox_file_name_ext.addWidget(self.cbox_file_ext)
         self.lineedit_file_name.setEnabled(self.cbox_savefig.isChecked())
         self.cbox_file_ext.setEnabled(self.cbox_savefig.isChecked())
@@ -195,13 +204,11 @@ class Ui_line(QMainWindow):
         # Title horizontal groups
         self.hbox_plot_title_1 = QtWidgets.QHBoxLayout()
         self.hbox_plot_title_2 = QtWidgets.QHBoxLayout()
-        self.label_plot_title = QtWidgets.QLabel("Plot title:")
         self.lineedit_plot_title = QtWidgets.QLineEdit("My plot")
         self.qbutton_color_title = QtWidgets.QPushButton("Color")
         self.qbutton_color_title.setProperty("id", next(self.iter_dict_attr))
         self.qbutton_color_title.clicked.connect(self.set_color)
         # Label size title
-        self.label_size_title = QtWidgets.QLabel("Font size:")
         # Spinbox title size
         self.sbox_title_size = QtWidgets.QSpinBox()
         self.sbox_title_size.setMinimum(1)
@@ -209,22 +216,20 @@ class Ui_line(QMainWindow):
         self.sbox_title_size.setValue(14)
         self.sbox_title_size.setSingleStep(1)
         # Add to plot title horizontal 1
-        self.hbox_plot_title_1.addWidget(self.label_plot_title)
+        self.hbox_plot_title_1.addWidget(QtWidgets.QLabel("Plot title:"))
         self.hbox_plot_title_1.addWidget(self.lineedit_plot_title)
         # Add to plot title horizontal 2
         self.hbox_plot_title_2.addWidget(QtWidgets.QLabel("Title color:"))
         self.hbox_plot_title_2.addWidget(self.qbutton_color_title, stretch=1)
-        self.hbox_plot_title_2.addWidget(self.label_size_title)
+        self.hbox_plot_title_2.addWidget(QtWidgets.QLabel("Font size:"))
         self.hbox_plot_title_2.addWidget(self.sbox_title_size)
 
         """PLOT LEGEND"""
         # Plot legend horizontal group 1
         self.hbox_plot_legend_1 = QtWidgets.QHBoxLayout()
         self.hbox_plot_legend_2 = QtWidgets.QHBoxLayout()
-        self.label_plot_legend = QtWidgets.QLabel("Plot legend:")
         self.lineedit_plot_legend = QtWidgets.QLineEdit("My legend")
         # Label legend font size
-        self.label_legend_size = QtWidgets.QLabel("Font size:")
         # Checkbox match legend color
         self.cbox_match_legend_color = QtWidgets.QCheckBox("Match legend color")
         # Spinbox title size
@@ -234,23 +239,32 @@ class Ui_line(QMainWindow):
         self.sbox_legend_size.setValue(14)
         self.sbox_legend_size.setSingleStep(1)
         # Add to plot legend horizontal group 1
-        self.hbox_plot_legend_1.addWidget(self.label_plot_legend)
+        self.hbox_plot_legend_1.addWidget(QtWidgets.QLabel("Plot legend:"))
         self.hbox_plot_legend_1.addWidget(self.lineedit_plot_legend)
         # Add to plot legend horizontal group 2
         self.hbox_plot_legend_2.addWidget(self.cbox_match_legend_color)
-        self.hbox_plot_legend_2.addWidget(self.label_legend_size)
+        self.hbox_plot_legend_2.addWidget(QtWidgets.QLabel("Font size:"))
         self.hbox_plot_legend_2.addWidget(self.sbox_legend_size, stretch=1)
 
         """ LEGEND POSITION """
-        POSITIONS = ["Best", "Upper right", "Upper left", "Lower left",
-                     "Lower right", "Right", "Center left", "Center right",
-                     "Lower center", "Upper center", "Center"]
+        POSITIONS = [
+            "Best", 
+            "Upper right", 
+            "Upper left", 
+            "Lower left",
+            "Lower right",
+            "Right",
+            "Center left", 
+            "Center right",
+            "Lower center",
+            "Upper center", 
+            "Center"
+        ]
         self.hbox_pos_legend = QtWidgets.QHBoxLayout()
-        self.label_pos_legend = QtWidgets.QLabel("Legend position:")
         self.qcbox_pos_legend = QtWidgets.QComboBox()
         for pos in POSITIONS:
             self.qcbox_pos_legend.addItem(pos)
-        self.hbox_pos_legend.addWidget(self.label_pos_legend)
+        self.hbox_pos_legend.addWidget(QtWidgets.QLabel("Legend position:"))
         self.hbox_pos_legend.addWidget(self.qcbox_pos_legend, stretch=1)
 
         """LINE PROPERTIES"""
@@ -279,8 +293,6 @@ class Ui_line(QMainWindow):
         self.hbox_line_properties_1.addWidget(self.cbox_line)
         self.hbox_line_properties_1.addWidget(self.label_line_width)
         self.hbox_line_properties_1.addWidget(self.hslider_line_width)
-        # Line style label
-        self.label_line_style = QtWidgets.QLabel("Line style:")
         # Line width combo box
         LINE_STYLES = ["Solid", "Dotted", "Dashed", "Dashdot"]
         self.cbox_line_style = QtWidgets.QComboBox()
@@ -296,7 +308,7 @@ class Ui_line(QMainWindow):
         self.pbutton_line_color.setEnabled(self.cbox_line.isChecked())
         self.pbutton_line_color.clicked.connect(self.set_color)
         # Add to line horizontal group 2
-        self.hbox_line_properties_2.addWidget(self.label_line_style)
+        self.hbox_line_properties_2.addWidget(QtWidgets.QLabel("Line style:"))
         self.hbox_line_properties_2.addWidget(self.cbox_line_style)
         self.hbox_line_properties_2.addWidget(self.pbutton_line_color)
 
@@ -326,13 +338,12 @@ class Ui_line(QMainWindow):
         self.hbox_marker_properties_1.addWidget(self.cbox_marker)
         self.hbox_marker_properties_1.addWidget(self.label_marker_size)
         self.hbox_marker_properties_1.addWidget(self.hslider_marker_size)
-        # Marker style label
-        self.label_marker_style = QtWidgets.QLabel("Style:")
         # Marker style
         self.cbox_marker_style = QtWidgets.QComboBox()
         self.cbox_marker_style.setFixedWidth(270)
         self.cbox_marker_style.setEnabled(self.cbox_marker.isChecked())
-        self.MARKER_STYLES = {"Point": ".", 
+        self.MARKER_STYLES = {
+            "Point": ".", 
             "Pixel": ",", 
             "Circle": "o", 
             "Triangle down": "v",
@@ -359,7 +370,7 @@ class Ui_line(QMainWindow):
         for marker_style in self.MARKER_STYLES.keys():
             self.cbox_marker_style.addItem(marker_style)
         # Add to marker horizontal group 2
-        self.hbox_marker_properties_2.addWidget(self.label_marker_style)
+        self.hbox_marker_properties_2.addWidget(QtWidgets.QLabel("Style:"))
         self.hbox_marker_properties_2.addWidget(self.cbox_marker_style)
         # Marker innter color
         self.pbutton_marker_inner_color = QtWidgets.QPushButton("Marker inner color")
@@ -412,21 +423,24 @@ class Ui_line(QMainWindow):
         return self.group_plot_settings
 
     def set_open_data_gbox(self):
-        GROUP_LABELS = ["Open file", "Add data"]
-        GROUP_CMDS = [self.browse_file, self.open_data_frame]
+        GROUP_LABELS = ["Open file", "Add data (TODO)"]
+        GROUP_CMDS = [self.browse_file, self.browse_file]
         self.group_import_data = QtWidgets.QGroupBox("Import data")
         self.group_import_data.setFixedHeight(120)
         self.v_import_data = QtWidgets.QHBoxLayout()
         self.v_import_data.setAlignment(QtCore.Qt.AlignCenter)
         for i in range(len(GROUP_LABELS)):
-            Pbutton_plot = QtWidgets.QPushButton(f"{GROUP_LABELS[i]}")
-            Pbutton_plot.clicked.connect(GROUP_CMDS[i])
-            size_policy = Pbutton_plot.sizePolicy()
+            pbutton_import = QtWidgets.QPushButton(f"{GROUP_LABELS[i]}")
+            # Cause TODO
+            if GROUP_LABELS[i] == "Add data (TODO)":
+                pbutton_import.setEnabled(False)
+            pbutton_import.clicked.connect(GROUP_CMDS[i])
+            size_policy = pbutton_import.sizePolicy()
             size_policy.setHorizontalPolicy(QtWidgets.QSizePolicy.Expanding)
             size_policy.setVerticalPolicy(QtWidgets.QSizePolicy.Expanding)
-            Pbutton_plot.setSizePolicy(size_policy)
+            pbutton_import.setSizePolicy(size_policy)
             # Add to vertical layout
-            self.v_import_data.addWidget(Pbutton_plot)
+            self.v_import_data.addWidget(pbutton_import)
              
         self.group_import_data.setLayout(self.v_import_data)
         return self.group_import_data
@@ -450,9 +464,8 @@ class Ui_line(QMainWindow):
         self.group_actions.setLayout(self.v_actions)
         return self.group_actions
 
-    """ 
-    ### CONNECTED METHODS 
-    """
+     
+    """CONNECTED METHODS"""
     @pyqtSlot()
     def change_state(self):
         sender = self.sender()
@@ -498,45 +511,61 @@ class Ui_line(QMainWindow):
             self.label_alpha.setText(f'Alpha: {slider_value/10}')
 
     @pyqtSlot()
-    def open_data_frame(self):
+    def _default_settings(self):
         pass
 
     """PLOT METHODS"""
     @pyqtSlot()
     def test_case(self):
-        """INITIALIZE ALL THE NEEDED VALUES FIRST"""
-        # Plot title
-        plot_title = self.lineedit_plot_title.text()
-        # Plot legend
-        plot_legend = self.lineedit_plot_legend.text()
-        # Plot legend location
-        plot_legend_location = self.qcbox_pos_legend.currentText().lower()
-        # x and y labels
+        """INITIALIZE ALL THE NEEDED VALUES FIRST
+        (in order of appearance on the window, 
+        from left to right, top to bottom)
+        """
+        # Grid
+        grid = self.box_grid.isChecked()
+        # LateX
+        latex = self.box_latex.isChecked()
+        # Log x and log y scale
+        # Labels
         xlabel = self.lineedit_xaxis_label.text()
         ylabel = self.lineedit_yaxis_label.text()
-        # Axes limits
+        label_color = self.dict_attr["label_color"]
+        label_size = self.sbox_label_size.value()
+        # Ticks
+        ticks_color = self.dict_attr["ticks_color"]
+        ticks_size = self.sbox_ticks_size.value()
+        # x and y limits
         x_min = self.lineedit_x_min.text()
         x_max = self.lineedit_x_max.text()
         y_min = self.lineedit_y_min.text()
         y_max = self.lineedit_y_max.text()
+
         if all(item.isdigit() for item in [x_min, x_max, y_min, y_max]):
             x_min, x_max = int(x_min), int(x_max)
             y_min, y_max = int(y_min), int(y_max)
         else:
             x_min = x_max = y_min = y_max = None
-        # Dict data
-        label_color = self.dict_attr["label_color"]
-        ticks_color = self.dict_attr["ticks_color"]
-        title_color = self.dict_attr["title_color"]
-        # Label, ticks, title, legend sizes
-        label_size = self.sbox_label_size.value()
-        ticks_size = self.sbox_ticks_size.value()
-        title_size = self.sbox_title_size.value()
-        legend_size = self.sbox_legend_size.value()
-        # Check boxes data
-        latex = self.box_latex.isChecked()
-        grid = self.box_grid.isChecked()
+        # Save fig
         save_fig = self.cbox_savefig.isChecked()
+        # File name and extension
+        if save_fig:
+            file_name = self.lineedit_file_name.text()
+            file_ext = self.cbox_file_ext.currentText()
+            full_file_name = f"{file_name}.{file_ext}"
+            FILE_PATH = os.path.join(FIGURES_DIR, full_file_name)
+            if not os.path.exists(FIGURES_DIR):
+                os.mkdir(FIGURES_DIR)
+        else:
+            FILE_PATH = None
+        # Plot title
+        plot_title = self.lineedit_plot_title.text()
+        title_color = self.dict_attr["title_color"]
+        title_size = self.sbox_title_size.value()
+        # Plot legend
+        plot_legend = self.lineedit_plot_legend.text()
+        legend_size = self.sbox_legend_size.value()
+        match_color_legend = self.cbox_match_legend_color.isChecked()
+        plot_legend_location = self.qcbox_pos_legend.currentText().lower()
         # Line style
         if self.cbox_line.isChecked():
             line_style = self.cbox_line_style.currentText().lower()
@@ -556,16 +585,6 @@ class Ui_line(QMainWindow):
             marker_inner_color = marker_outer_color = None
         # Alpha
         alpha = self.hslider_alpha.value()/10
-        # File name
-        if save_fig:
-            file_name = self.lineedit_file_name.text()
-            file_ext = self.cbox_file_ext.currentText()
-            full_file_name = f"{file_name}.{file_ext}"
-            FILE_PATH = os.path.join(FIGURES_DIRECTORY, full_file_name)
-            if not os.path.exists(FIGURES_DIRECTORY):
-                os.mkdir(FIGURES_DIRECTORY)
-        else:
-            FILE_PATH = None
 
         x = sorted([random.randint(0, 200) for _ in range(0, 150)])
         y = sorted([random.randint(0, 200) for _ in range(0, 150)])
@@ -575,14 +594,14 @@ class Ui_line(QMainWindow):
                 x_min, x_max, y_min, y_max,
                 xlabel, ylabel,
                 label_color, label_size,
-                plot_legend, plot_legend_location, legend_size,
+                plot_legend, plot_legend_location, legend_size, match_color_legend,
                 ticks_color, ticks_size,
                 plot_title, title_color, title_size,
                 line_color, line_style, line_width, alpha,
                 marker_style, marker_size,
                 marker_inner_color, marker_outer_color,
                 grid, save_fig, latex, FILE_PATH
-            )
+        )
 
     """STATIC METHODS"""
     @staticmethod

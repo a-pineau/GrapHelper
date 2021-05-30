@@ -12,7 +12,7 @@ def line_plot(x, y,
         xmin, xmax, ymin, ymax,
         x_label, y_label,
         label_color, label_size,
-        my_legend, my_loc, legend_size,
+        my_legend, my_loc, legend_size, match_color,
         ticks_color, ticks_size,
         my_title, title_color, title_size,
         my_color, line_style, width, my_alpha,   
@@ -48,7 +48,7 @@ def line_plot(x, y,
     fig, ax = plt.subplots(constrained_layout=True)
     ax.plot(x, y,
             color=my_color, linestyle=line_style, linewidth=width, 
-            alpha=my_alpha,
+            alpha=my_alpha, label=my_legend,
             marker=my_marker, markersize=marker_size, 
             markerfacecolor=marker_inner_color,
             markeredgecolor=marker_outer_color)
@@ -66,12 +66,16 @@ def line_plot(x, y,
     # Title
     ax.set_title(my_title, fontsize=title_size, color=title_color)
     # Legend
-    ax.legend([my_legend], loc=my_loc, prop={"size": legend_size})
+    leg = ax.legend(loc=my_loc, prop={"size": legend_size})
+    if match_color:
+        for line, text in zip(leg.get_lines(), leg.get_texts()):
+            text.set_color(line.get_color())
+
 
     if grid: ax.grid()
     if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.05)
 
     # display
-    plt.show()
+    fig.show()
 
 

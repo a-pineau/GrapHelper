@@ -1,58 +1,69 @@
-import numpy as np
-import matplotlib.pyplot as plt
-plt.rc('text', usetex=True)
+import csv
+import os
+import sys
+from os.path import dirname, realpath,join
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow,QVBoxLayout,QAction,QFileDialog
+from PyQt5.uic import  loadUiType
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
-# interface tracking profiles
-N = 500
-delta = 0.6
-X = np.linspace(-1, 1, N)
-plt.plot(X, (1 - np.tanh(4 * X / delta)) / 2,    # phase field tanh profiles
-         X, (1.4 + np.tanh(4 * X / delta)) / 4, "C2",  # composition profile
-         X, X < 0, 'k--')                        # sharp interface
+scriptDir=dirname(realpath(__file__))
+From_Main,_= loadUiType(join(dirname(__file__),"main.ui"))
 
-# legend
-plt.legend(('phase field', 'level set', 'sharp interface'),
-           shadow=True, loc=(0.01, 0.48), handlelength=1.5, fontsize=16)
+class Sheet(QMainWindow,From_Main):
+    def __init__(self):
+        super(Sheet, self).__init__()
+        QMainWindow.__init__(self)
+        self.setupUi(self)
+        self.ToolBar()
+        self.sc =myCanvas()
+        self.l=QVBoxLayout(self.frame)
+        self.l.addWidget(self.sc)
 
-# the arrow
-plt.annotate("", xy=(-delta / 2., 0.1), xytext=(delta / 2., 0.1),
-             arrowprops=dict(arrowstyle="<->", connectionstyle="arc3"))
-plt.text(0, 0.1, r'$\delta$',
-         {'color': 'black', 'fontsize': 24, 'ha': 'center', 'va': 'center',
-          'bbox': dict(boxstyle="round", fc="white", ec="black", pad=0.2)})
+    def ToolBar(self):
+        AddFile = QAction(QIcon('images.png'),'Add File',self)
+        AddFile.triggered.connect(self.open_sheet)
+        self.toolBar= self.addToolBar('Add data File')
+        self.toolBar.addAction(AddFile)
+        AddPlot = QAction(QIcon('Scatter.png'),'Scatter',self)
+        AddPlot.triggered.connect(self.Plot)
+        self.toolBar.addAction(AddPlot)
 
-# Use tex in labels
-plt.xticks((-1, 0, 1), ('$-1$', r'$\pm 0$', '$+1$'), color='k', size=20)
+    def open_sheet(self):
+        #QFileDialog.getOpenFileName((self,'Open CSV',),os.getenv('Home', 'CSV(*.)'))
+        path = QFileDialog.getOpenFileName(self, "Open", "", "CSV Files (*.csv);;All Files (*)")
+        if path[0]!='':
+            self.FileN=path[0]
 
-# Left Y-axis labels, combine math mode and text mode
-plt.ylabel(r'{phase field}', {'color': 'C0', 'fontsize': 20})
-plt.yticks((0, 0.5, 1), (r'\bf{0}', r'\bf{.5}', r'\bf{1}'), color='k', size=20)
+    def Plot(self):
+        f=self.FileN
+        index = int(self.lineEdit.text())
+        x= []
+        y=[]
+        with open(f, newline = '') as csv_file:
+            my_file = csv.reader(csv_file, delimiter = ',',
+                                 quotechar = '|')
+            for row in my_file:
+                x.append(str(row[0]))
+                y.append(str(row[index]))
+        self.sc.plot(x, y)
 
-# Right Y-axis labels
-plt.text(1.02, 0.5, r"\bf{level set} $\phi$", {'color': 'C2', 'fontsize': 20},
-         horizontalalignment='left',
-         verticalalignment='center',
-         rotation=90,
-         clip_on=False,
-         transform=plt.gca().transAxes)
 
-# Use multiline environment inside a `text`.
-# level set equations
-eq1 = r"\begin{eqnarray*}" + \
-      r"|\nabla\phi| &=& 1,\\" + \
-      r"\frac{\partial \phi}{\partial t} + U|\nabla \phi| &=& 0 " + \
-      r"\end{eqnarray*}"
-plt.text(1, 0.9, eq1, {'color': 'C2', 'fontsize': 18}, va="top", ha="right")
+class myCanvas(FigureCanvas):
+    def __init__(self):
+        self.fig=Figure()
+        FigureCanvas.__init__(self,self.fig)
 
-# phase field equations
-eq2 = r'\begin{eqnarray*}' + \
-      r'\mathcal{F} &=& \int f\left( \phi, c \right) dV, \\ ' + \
-      r'\frac{ \partial \phi } { \partial t } &=& -M_{ \phi } ' + \
-      r'\frac{ \delta \mathcal{F} } { \delta \phi }' + \
-      r'\end{eqnarray*}'
-plt.text(0.18, 0.18, eq2, {'color': 'C0', 'fontsize': 16})
+    def plot(self,xarray,yarray):
+        self.fig.clear()
+        self.ax= self.fig.add_subplot(111)
+        self.ax.plot(xarray[1:],yarray[1:])
+        self.ax.set_xlabel(xarray[0])
+        self.ax.set_ylabel(yarray[0])
+        self.draw()
 
-plt.text(-1, .30, r'gamma: $\gamma$', {'color': 'r', 'fontsize': 20})
-plt.text(-1, .18, r'Omega: $\Omega$', {'color': 'b', 'fontsize': 20})
-
-plt.show()
+app = QApplication(sys.argv)
+sheet= Sheet()
+sheet.show()
+sys.exit(app.exec_())
