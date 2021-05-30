@@ -17,6 +17,7 @@ def line_plot(x, y,
         my_title, title_color, title_size,
         my_color, line_style, width, my_alpha,   
         my_marker, marker_size, marker_inner_color, marker_outer_color,
+        logx, logy,
         grid, save, latex, file_name
         ):
     """
@@ -42,6 +43,7 @@ def line_plot(x, y,
     Returns: None
     -------
     """
+    plt.rcParams['toolbar'] = 'None'
     if latex:
         rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
         rc('text', usetex=True)
@@ -52,6 +54,9 @@ def line_plot(x, y,
             marker=my_marker, markersize=marker_size, 
             markerfacecolor=marker_inner_color,
             markeredgecolor=marker_outer_color)
+
+    if logx: ax.semilogx()
+    if logy: ax.semilogy()
     # Axes limits
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
@@ -61,20 +66,27 @@ def line_plot(x, y,
     # Ticks
     ax.tick_params(axis='x', labelsize=ticks_size, colors=ticks_color)
     ax.tick_params(axis='y', labelsize=ticks_size, colors=ticks_color)
-    ax.xaxis.set_minor_locator(AutoMinorLocator())
-    ax.yaxis.set_minor_locator(AutoMinorLocator())
+
+    if not logx and not logy:
+        ax.xaxis.set_minor_locator(AutoMinorLocator())
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
+
     # Title
     ax.set_title(my_title, fontsize=title_size, color=title_color)
     # Legend
-    leg = ax.legend(loc=my_loc, prop={"size": legend_size})
-    if match_color:
-        for line, text in zip(leg.get_lines(), leg.get_texts()):
-            text.set_color(line.get_color())
+    if my_legend:
+        leg = ax.legend(loc=my_loc, prop={"size": legend_size})
+        if match_color:
+            for line, text in zip(leg.get_lines(), leg.get_texts()):
+                text.set_color(line.get_color())
+            for marker, text in zip(leg.get_markers(), leg.get_texts()):
+                text.set_color(line.get_color())
 
 
     if grid: ax.grid()
     if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.05)
 
+    rc("text", usetex=False)
     # display
     fig.show()
 
