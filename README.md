@@ -29,8 +29,8 @@ Main frame:
 Line plot with two examples:\
 #1\
 ![GrapHelper](screenshots/screenshot_lineplot.png)
-![GrapHelper](screenshots/Plot_1.PNG)\
+![GrapHelper](screenshots/Plot_1.PNG)
 
 #2\
 ![GrapHelper](screenshots/screenshot_lineplot_2.png)
-![GrapHelper](screenshots/Plot_2.PNG)\
+![GrapHelper](screenshots/Plot_2.PNG)
