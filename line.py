@@ -22,13 +22,12 @@ LATEX_INSTALL = find_executable("latex")
 # ICONS ARE FREE TO USE
 # https://svg-clipart.com/icon/LxDAwsk-open-folder-icon-clipart
 ICON_OPEN_FILE = os.path.join(IMAGES_DIR, "open_file.svg")
-# https://dryicons.com/icon/line-graph-icon-6315'
+# https://dryicons.com/icon/line-graph-icon-6315
 ICON_PLOT_DATA = os.path.join(IMAGES_DIR, "plot_data.svg")
-# https://www.softicons.com/toolbar-icons/status-icons-set-by-iconleak/back-icon
+# https://www.stockio.com/free-icon/beatriz-icons-test
 ICON_TEST_CASE = os.path.join(IMAGES_DIR, "test_case.svg")
 # https://www.softicons.com/toolbar-icons/status-icons-set-by-iconleak/back-icon
 ICON_DEFAULT_SETTINGS = os.path.join(IMAGES_DIR, "default_settings.png")
-
 
 
 class Ui_line(QMainWindow):
@@ -279,7 +278,7 @@ class Ui_line(QMainWindow):
         self.hbox_plot_legend_2.addWidget(QtWidgets.QLabel("Font size:"))
         self.hbox_plot_legend_2.addWidget(self.sbox_legend_size, stretch=1)
 
-        """ LEGEND POSITION """
+        """LEGEND POSITION"""
         POSITIONS = [
             "Best", 
             "Upper right", 
@@ -530,7 +529,7 @@ class Ui_line(QMainWindow):
         self.sbox_title_size.setValue(14)
         self.lineedit_plot_legend.setText("My legend")
         self.cbox_match_legend_color.setCheckState(False)
-        self.sbox_legend_size.setValue(14)
+        self.sbox_legend_size.setValue(11)
         self.qcbox_pos_legend.setCurrentText("Best")
         self.cbox_line.setCheckState(QtCore.Qt.Checked)
         self.hslider_line_width.setEnabled(True)
@@ -589,7 +588,8 @@ class Ui_line(QMainWindow):
         if self.cbox_latex.isChecked() and not LATEX_INSTALL:
             err_latex_msg = QMessageBox()
             err_latex_msg.setWindowTitle("Plot error")
-            err_latex_msg.setText("LaTeX is not installed on your computer!")
+            err_latex_msg.setText("LaTeX is not installed on your computer!\n"
+                                  "Please visit: https://www.latex-project.org/")
             err_latex_msg.setIcon(QMessageBox.Critical)
             err_latex_msg.exec_()
             return True

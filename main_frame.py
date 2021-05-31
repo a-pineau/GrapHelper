@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QMessageBox,
 class Ui_MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("GrapHelper - Data Vizualization")
+        self.setWindowTitle("GrapHelper - Data Visualization")
         self.setObjectName("self")
         self.resize(400, 350)
         self.central_widget = QtWidgets.QWidget(self)
@@ -52,22 +52,17 @@ class Ui_MainWindow(QMainWindow):
         font.setFamily("Calibri")
         font.setPointSize(12)
         font.setBold(True)
-        LABELS = [
-            "Line Plot", 
-            "Bar Graphs", 
-            "Scatter Plot",
-            "Area Plot", 
-            "Histograms", 
-            "Stream Plot",
-            "Polar Plot", 
-            "3D Plot", 
-            "Images"
-        ]
-        COMMANDS = [self.dialog_line.show, self.dialog_line.show, 
-                    self.dialog_line.show, self.dialog_line.show, 
-                    self.dialog_line.show, self.dialog_line.show,
-                    self.dialog_line.show, self.dialog_line.show, 
-                    self.dialog_line.show]
+        BUTTONS_DATA = {
+            "Line Plot": self.dialog_line.show,
+            "Bar Graphs": self.to_add,
+            "Scatter Plot": self.to_add,
+            "Area Plot": self.to_add,
+            "Histograms": self.to_add,
+            "Stream Plot": self.to_add,
+            "Polar Plot": self.to_add,
+            "3D Plot": self.to_add,
+            "Images": self.to_add
+        }
 
         # Grid
         self.grid_layout = QtWidgets.QGridLayout()
@@ -78,21 +73,25 @@ class Ui_MainWindow(QMainWindow):
 
         col = [0, 0, 0, 1, 1, 1, 2, 2, 2]
         row = [0, 1, 2] * 3
-        iter_LABELS = iter(LABELS)
-        iter_COMMANDS = iter(COMMANDS)
+        iterkey_BUTTONS_DATA = iter(BUTTONS_DATA.keys())
+        iterval_BUTTONS_DATA = iter(BUTTONS_DATA.values())
         for r, c in zip(col, row):
             pbutton = QtWidgets.QPushButton()
-            pbutton.setText(next(iter_LABELS))
+            pbutton.setText(next(iterkey_BUTTONS_DATA))
             pbutton.setFont(font)
             pbutton.setFixedSize(button_size_w, button_size_h)
-            pbutton.clicked.connect(next(iter_COMMANDS))
+            pbutton.clicked.connect(next(iterval_BUTTONS_DATA))
             self.grid_layout.addWidget(pbutton, r, c)
 
         # Add to layout
         self.V_layout.addLayout(self.grid_layout)
 
+    def to_add(self):
+        pass
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Ui_MainWindow()
     win.show()
+    app.setStyle("Fusion")
     sys.exit(app.exec_())
