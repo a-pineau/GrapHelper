@@ -52,10 +52,17 @@ class Ui_MainWindow(QMainWindow):
         font.setFamily("Calibri")
         font.setPointSize(12)
         font.setBold(True)
-        LABELS = ["Line Plot", "Bar Grahps", "Scatter Plot",
-                  "Area Plot", "Histograms", "Stream Plot",
-                  "Polar Plot", "3D Plot", "Images"
-                  ]
+        LABELS = [
+            "Line Plot", 
+            "Bar Graphs", 
+            "Scatter Plot",
+            "Area Plot", 
+            "Histograms", 
+            "Stream Plot",
+            "Polar Plot", 
+            "3D Plot", 
+            "Images"
+        ]
         COMMANDS = [self.dialog_line.show, self.dialog_line.show, 
                     self.dialog_line.show, self.dialog_line.show, 
                     self.dialog_line.show, self.dialog_line.show,
