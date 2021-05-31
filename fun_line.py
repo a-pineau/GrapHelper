@@ -79,9 +79,6 @@ def line_plot(x, y,
         if match_color:
             for line, text in zip(leg.get_lines(), leg.get_texts()):
                 text.set_color(line.get_color())
-            for marker, text in zip(leg.get_markers(), leg.get_texts()):
-                text.set_color(line.get_color())
-
 
     if grid: ax.grid()
     if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.05)

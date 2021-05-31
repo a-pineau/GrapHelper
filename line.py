@@ -2,10 +2,8 @@ import sys
 import os
 import csv
 import random
-import numpy as np
 import pandas as pd
 import fun_line as f_line
-import canvas as canvas
 
 from distutils.spawn import find_executable
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -54,17 +52,15 @@ class Ui_line(QMainWindow):
           "marker_inner_color": "red",
           "marker_outer_color": "black"
         }
+        self.iter_dict_attr = iter(self.dict_attr)
+
         # Tool bar
         self._set_toolbar()
-        self.iter_dict_attr = iter(self.dict_attr)
+        self.label_file_state = QtWidgets.QLabel("No file loaded!")
         # Grid settings and miscs.
         self.grid_layout.addWidget(self._set_grid_settings_gbox(), 0, 0)
         # Plot settings
         self.grid_layout.addWidget(self._set_plot_settings_gbox(), 0, 1)
-        # # Import data
-        # self.grid_layout.addWidget(self.set_open_data_gbox(),     1, 0)
-        # # Actions
-        # self.grid_layout.addWidget(self.set_actions_gbox(),       1, 1)
         # Set widgets default settings
         self._set_default_settings()
         
@@ -73,6 +69,8 @@ class Ui_line(QMainWindow):
     ### SETUP METHODS 
     """
     def _set_toolbar(self):
+        """ Set the toolbar, the icons and associated slots """
+
         icon_open_file = QtGui.QIcon(ICON_OPEN_FILE)
         icon_plot_data = QtGui.QIcon(ICON_PLOT_DATA)
         icon_test_case = QtGui.QIcon(ICON_TEST_CASE)
@@ -96,7 +94,10 @@ class Ui_line(QMainWindow):
         self.toolbar.addAction(default_settings)
 
 
+
     def _set_grid_settings_gbox(self):
+        """ Set the grids and miscellaneous settings """
+
         self.group_box = QtWidgets.QGroupBox("Grid settings and miscellaneous")
         self.v_box = QtWidgets.QVBoxLayout()
         # Show grid
@@ -263,7 +264,7 @@ class Ui_line(QMainWindow):
         self.lineedit_plot_legend = QtWidgets.QLineEdit("My legend")
         # Label legend font size
         # Checkbox match legend color
-        self.cbox_match_legend_color = QtWidgets.QCheckBox("Match legend color")
+        self.cbox_match_legend_color = QtWidgets.QCheckBox("Match legend color (works with line only)")
         # Spinbox title size
         self.sbox_legend_size = QtWidgets.QSpinBox()
         self.sbox_legend_size.setMinimum(1)
@@ -454,49 +455,6 @@ class Ui_line(QMainWindow):
         self.group_plot_settings.setLayout(self.vbox_plot_settings)
         return self.group_plot_settings
 
-    def _set_open_data_gbox(self):
-        GROUP_LABELS = ["Open file", "Add data (TODO)"]
-        GROUP_CMDS = [self.browse_file, self.browse_file]
-        self.group_import_data = QtWidgets.QGroupBox("Import data")
-        self.group_import_data.setFixedHeight(120)
-        self.v_import_data = QtWidgets.QHBoxLayout()
-        self.v_import_data.setAlignment(QtCore.Qt.AlignCenter)
-        for i in range(len(GROUP_LABELS)):
-            pbutton_import = QtWidgets.QPushButton(f"{GROUP_LABELS[i]}")
-            # Cause TODO
-            if GROUP_LABELS[i] == "Add data (TODO)":
-                pbutton_import.setEnabled(False)
-            pbutton_import.clicked.connect(GROUP_CMDS[i])
-            size_policy = pbutton_import.sizePolicy()
-            size_policy.setHorizontalPolicy(QtWidgets.QSizePolicy.Expanding)
-            size_policy.setVerticalPolicy(QtWidgets.QSizePolicy.Expanding)
-            pbutton_import.setSizePolicy(size_policy)
-            # Add to vertical layout
-            self.v_import_data.addWidget(pbutton_import)
-             
-        self.group_import_data.setLayout(self.v_import_data)
-        return self.group_import_data
-
-    def _set_actions_gbox(self):  
-        GROUP_LABELS = ["Plot data", "Test case"]
-        GROUP_CMDS = [self.browse_file, self.test_case]
-        self.group_actions = QtWidgets.QGroupBox("Actions")
-        self.v_actions = QtWidgets.QHBoxLayout()
-        self.v_actions.setAlignment(QtCore.Qt.AlignCenter)
-        for i in range(len(GROUP_LABELS)):
-            Pbutton_plot = QtWidgets.QPushButton(GROUP_LABELS[i])
-            Pbutton_plot.clicked.connect(GROUP_CMDS[i])
-            size_policy = Pbutton_plot.sizePolicy()
-            size_policy.setHorizontalPolicy(QtWidgets.QSizePolicy.Expanding)
-            size_policy.setVerticalPolicy(QtWidgets.QSizePolicy.Expanding)
-            Pbutton_plot.setSizePolicy(size_policy)
-            # Add to vertical layout
-            self.v_actions.addWidget(Pbutton_plot)
-
-        self.group_actions.setLayout(self.v_actions)
-        return self.group_actions
-
-     
     """CONNECTED METHODS"""
     @pyqtSlot()
     def change_state(self):
@@ -550,7 +508,7 @@ class Ui_line(QMainWindow):
         self.cbox_xlogscale.setCheckState(False)
         self.cbox_ylogscale.setCheckState(False)
         self.lineedit_xaxis_label.setText("My x label")
-        self.lineedit_yaxis_label.setText("My x label")
+        self.lineedit_yaxis_label.setText("My y label")
         self.lineedit_x_min.setText(None)
         self.lineedit_x_max.setText(None)
         self.lineedit_y_min.setText(None)
