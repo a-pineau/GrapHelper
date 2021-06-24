@@ -36,6 +36,11 @@ class Ui_line(QMainWindow):
         Set the groupboxes and the default settings
         """
         super().__init__()
+
+        # Data frame as a Pandas object
+        self.df = None
+
+        # Main window generic parameters
         self.setWindowTitle("GrapHelper - Line Plot")
         self.central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.central_widget)
@@ -80,9 +85,12 @@ class Ui_line(QMainWindow):
         test_case = QtWidgets.QAction(icon_test_case, "Plot test case", self)
         default_settings = QtWidgets.QAction(icon_default_settings, "Default settings", self)
 
+        plot_data.setObjectName("ActionPlotData")
+        test_case.setObjectName("ActionTestCase")
+
         open_file.triggered.connect(self.open_file)
         plot_data.triggered.connect(self.plot_data)
-        test_case.triggered.connect(self.plot_test_case)
+        test_case.triggered.connect(self.plot_data)
         default_settings.triggered.connect(self._set_default_settings)
 
         self.toolbar = self.addToolBar("")
@@ -99,8 +107,13 @@ class Ui_line(QMainWindow):
 
         self.group_box = QtWidgets.QGroupBox("Grid settings and miscellaneous")
         self.v_box = QtWidgets.QVBoxLayout()
+        self.h_box = QtWidgets.QHBoxLayout()
         # Show grid
         self.cbox_grid = QtWidgets.QCheckBox("Show grid")
+        # Data statistics
+        self.cbox_data_stats = QtWidgets.QCheckBox("Data statistics")
+        self.h_box.addWidget(self.cbox_grid)
+        self.h_box.addWidget(self.cbox_data_stats)
         # LaTeX text rendering
         self.cbox_latex = QtWidgets.QCheckBox("LaTeX text rendering (requires a LaTeX installation)")
         # Log scale horizontal group
@@ -146,7 +159,7 @@ class Ui_line(QMainWindow):
         self.hgroup_y_limits.addWidget(self.lineedit_y_min)
         self.hgroup_y_limits.addWidget(self.lineedit_y_max)
         # Add to vertical layout
-        self.v_box.addWidget(self.cbox_grid)
+        self.v_box.addLayout(self.h_box)
         self.v_box.addWidget(self.cbox_latex)
         self.v_box.addLayout(self.h_group_logscale)
         self.v_box.addLayout(self.hgroup_xaxis_label)
@@ -501,6 +514,8 @@ class Ui_line(QMainWindow):
 
     @pyqtSlot()
     def _set_default_settings(self):
+        """ Set the default settings of the pushbuttons, checkboxes and sliders """
+
         # Left group box
         self.cbox_grid.setCheckState(False)
         self.cbox_latex.setCheckState(False)
@@ -553,36 +568,40 @@ class Ui_line(QMainWindow):
         self.hslider_alpha.setValue(10)
 
     def open_file(self):
+        """ Open file browser, try to convert all the entries into numeric values
+        If this fails, an error message is shown
+        """
+
         file_name, _ = QFileDialog.getOpenFileName(self, "Open CSV", FILE_DIR, "CSV Files (*.csv *.txt)")   
         if file_name:
-            df = pd.read_csv(file_name, header=None)
-            self.x = df.iloc[:, 0].tolist()
-            self.y = df.iloc[:, 1].tolist()
+            self.df = pd.read_csv(file_name, header=None)
+            err_data_msg = QMessageBox()
+            err_data_msg.setWindowTitle("Data error")
+            # Check if the columns contain only numeric value
+            print(self.df.iloc[:,:])
+            try:
+                self.df.iloc[:,:] = self.df.iloc[:,:].apply(pd.to_numeric)
+            except ValueError as err:
+                err_msg = "Columns must containt only numeric entries!\n" + str(err)
+                err_data_msg.setText(err_msg)
+                err_data_msg.setIcon(QMessageBox.Critical)
+                err_data_msg.exec_()
 
     def plot_data(self):
+        """ Plot the data """
+        
         if self.latex_error():
             return
-        try:
-            self.plot_helper(self.x, self.y)
-        except TypeError as err:
-            err_data_msg = QMessageBox()
-            err_data_msg.setWindowTitle("Plot error")
-            err_data_msg.setText("Data are incorrect!\nData must be integer or float type")
-            err_data_msg.setIcon(QMessageBox.Critical)
-            err_data_msg.exec_()
-
-
-    def plot_test_case(self):
-        if self.latex_error():
-            return
-        # Read CSV test file
-        FILE_PATH = os.path.join(TEST_DIR, "random_data.csv")
-        df = pd.read_csv(FILE_PATH, usecols=["x", "y"])
-        x = df["x"].tolist()
-        y = df["y"].tolist()
+        if self.sender().objectName() == "ActionTestCase":
+            FILE_PATH = os.path.join(TEST_DIR, "random_data.csv")
+            self.df = pd.read_csv(FILE_PATH)
+        
+        stats = None
+        if self.cbox_data_stats.isChecked():
+            stats = self.df.describe().to_string(justify="justify")
 
         # Plot data
-        self.plot_helper(x, y)
+        self.plot_helper(self.df.iloc[:,0], self.df.iloc[:,1], stats)
 
     def latex_error(self):
         if self.cbox_latex.isChecked() and not LATEX_INSTALL:
@@ -597,7 +616,7 @@ class Ui_line(QMainWindow):
 
     """PLOT METHODS"""
     @pyqtSlot()
-    def plot_helper(self, x, y):
+    def plot_helper(self, x, y, stats):
         """INITIALIZE ALL THE NEEDED VALUES FIRST
         (in order of appearance on the window, 
         from left to right, top to bottom)
@@ -691,7 +710,8 @@ class Ui_line(QMainWindow):
                 marker_style, marker_size,
                 marker_inner_color, marker_outer_color,
                 logx, logy,
-                grid, save_fig, latex, FILE_PATH
+                grid, save_fig, latex, FILE_PATH,
+                stats
         )
 
 

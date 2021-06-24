@@ -18,7 +18,8 @@ def line_plot(x, y,
         my_color, line_style, width, my_alpha,   
         my_marker, marker_size, marker_inner_color, marker_outer_color,
         logx, logy,
-        grid, save, latex, file_name
+        grid, save, latex, file_name,
+        stats
         ):
     """
     A helper function to make a simple plot
@@ -84,6 +85,13 @@ def line_plot(x, y,
     if save: plt.savefig(file_name, bbox_inches='tight', pad_inches=0.05)
 
     rc("text", usetex=False)
+    # Stats
+    if stats: 
+        text_kwargs = dict(va='center', ma="right", fontsize=10)
+        y_pos = (ax.get_ylim()[0] + ax.get_ylim()[1]) / 2
+        x_pos = ax.get_xlim()[1] + 5 # Offset
+        plt.text(x_pos, y_pos, stats, **text_kwargs)
+
     # display
     fig.show()
 
